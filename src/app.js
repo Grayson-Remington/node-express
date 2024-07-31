@@ -1,17 +1,18 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
-
+import * as pg from 'pg';
+const { Pool } = pg;
 import * as middleware from './utils/middleware.js';
 import helloRoute from './routes/helloRouter.js';
-import pg from 'pg';
+
 const app = express();
 
 // parse json request body
 app.use(express.json());
 const connectionString =
 	'postgresql://postgres:rVzMhszDFrNphBTObthHLfHUpPkVVXDi@roundhouse.proxy.rlwy.net:51652/railway';
-const pool = new pg.Pool({ connectionString });
+const pool = new Pool({ connectionString: connectionString });
 // enable cors
 app.use(cors());
 
