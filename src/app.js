@@ -84,6 +84,70 @@ app.delete('/points/:id', async (req, res) => {
 		res.status(500).json({ error: 'Internal Server Error' });
 	}
 });
+
+app.post('/groundfeatures', async (req, res) => {
+	const { graphic, graphic_id } = req.body;
+
+	try {
+		const result = await pool.query(
+			'INSERT INTO groundfeatures (graphic, graphic_id) VALUES ($1, $2) RETURNING *',
+			[graphic, graphic_id]
+		);
+		res.json(result.rows[0]);
+	} catch (err) {
+		console.error('Error saving ground feature:', err);
+		res.status(500).json({ error: 'Internal Server Error' });
+	}
+});
+app.get('/groundfeatures', async (req, res) => {
+	try {
+		const result = await pool.query('SELECT * FROM groundfeatures');
+		res.json(result.rows);
+	} catch (err) {
+		console.error('Error fetching groundfeatures:', err);
+		res.status(500).json({ error: 'Internal Server Error' });
+	}
+});
+app.post('/update-groundfeature', async (req, res) => {
+	const { graphic, graphic_id } = req.body;
+
+	try {
+		const result = await pool.query(
+			'UPDATE groundfeatures SET graphic = $1 WHERE graphic_id = $2 RETURNING *',
+			[graphic, graphic_id]
+		);
+
+		if (result.rows.length === 0) {
+			res.status(404).json({ error: 'Graphic not found' });
+		} else {
+			res.json(result.rows[0]);
+		}
+	} catch (err) {
+		console.error('Error updating groundfeatures:', err);
+		res.status(500).json({ error: 'Internal Server Error' });
+	}
+});
+
+app.delete('/groundfeatures/:id', async (req, res) => {
+	const { id } = req.params;
+	try {
+		const result = await pool.query(
+			'DELETE FROM groundfeatures WHERE graphic_id = $1',
+			[id]
+		);
+		if (result.rowCount > 0) {
+			res.status(200).json({
+				message: 'groundfeatures deleted successfully',
+			});
+		} else {
+			res.status(404).json({ error: 'groundfeatures not found' });
+		}
+	} catch (err) {
+		console.error('Error deleting groundfeatures:', err);
+		res.status(500).json({ error: 'Internal Server Error' });
+	}
+});
+
 app.post('/polylines', async (req, res) => {
 	const { graphic, graphic_id } = req.body;
 
